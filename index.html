@@ -5,19 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>
       // Suppress dev server WebSocket disconnect errors in iframe preview (HMR is disabled)
-      window.addEventListener('error', function(event) {
-        if (event && event.message && (event.message.includes('WebSocket') || event.message.includes('ws://') || event.message.includes('wss://'))) {
-          event.stopImmediatePropagation();
-          event.preventDefault();
-          return true;
-        }
-      }, true);
-      window.addEventListener('unhandledrejection', function(event) {
-        if (event && event.reason && String(event.reason).includes('WebSocket')) {
-          event.stopImmediatePropagation();
-          event.preventDefault();
-        }
-      }, true);
+      (function() {
+        try {
+          var NativeWebSocket = window.WebSocket;
+          if (typeof NativeWebSocket === 'function') {
+            function PatchedWebSocket(url, protocols) {
+              var isViteHmr = false;
+              try {
+                if (protocols === 'vite-hmr' || protocols === 'vite-ping') {
+                  isViteHmr = true;
+                } else if (typeof url === 'string' && (url.indexOf('token=') !== -1 || url.indexOf('@vite') !== -1)) {
+                  isViteHmr = true;
+                }
+              } catch (_) {}
+
+              if (isViteHmr) {
+                var listeners = {};
+                var fake = {
+                  readyState: 1, // OPEN
+                  binaryType: 'blob',
+                  protocol: protocols || '',
+                  url: url,
+                  send: function() {},
+                  close: function() {},
+                  addEventListener: function(type, fn) {
+                    if (!listeners[type]) listeners[type] = [];
+                    listeners[type].push(fn);
+                    if (type === 'open') {
+                      setTimeout(function() {
+                        try { fn({ type: 'open' }); } catch (_) {}
+                      }, 0);
+                    }
+                  },
+                  removeEventListener: function(type, fn) {
+                    if (listeners[type]) {
+                      listeners[type] = listeners[type].filter(function(cb) { return cb !== fn; });
+                    }
+                  },
+                  dispatchEvent: function() { return true; },
+                  onopen: null,
+                  onclose: null,
+                  onerror: null,
+                  onmessage: null,
+                };
+                setTimeout(function() {
+                  if (typeof fake.onopen === 'function') {
+                    try { fake.onopen({ type: 'open' }); } catch (_) {}
+                  }
+                }, 0);
+                return fake;
+              }
+
+              if (arguments.length > 1 && protocols !== undefined) {
+                return new NativeWebSocket(url, protocols);
+              } else {
+                return new NativeWebSocket(url);
+              }
+            }
+
+            PatchedWebSocket.prototype = NativeWebSocket.prototype;
+            PatchedWebSocket.CONNECTING = 0;
+            PatchedWebSocket.OPEN = 1;
+            PatchedWebSocket.CLOSING = 2;
+            PatchedWebSocket.CLOSED = 3;
+            window.WebSocket = PatchedWebSocket;
+          }
+        } catch (err) {}
+
+        try {
+          var origConsoleError = console.error;
+          console.error = function() {
+            var msg = arguments.length > 0 ? String(arguments[0]) : '';
+            if (msg.indexOf('WebSocket') !== -1 || msg.indexOf('vite:ws') !== -1 || msg.indexOf('failed to connect to websocket') !== -1) {
+              return;
+            }
+            return origConsoleError.apply(console, arguments);
+          };
+        } catch (_) {}
+
+        window.addEventListener('error', function(event) {
+          if (event && event.message && (event.message.indexOf('WebSocket') !== -1 || event.message.indexOf('ws://') !== -1 || event.message.indexOf('wss://') !== -1)) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+            return true;
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = event && event.reason ? String(event.reason) : '';
+          if (reason.indexOf('WebSocket') !== -1) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+          }
+        }, true);
+      })();
     </script>
     <title>Pinboard Task Manager</title>
     <meta name="description" content="Clean Chrome Light 3-part task manager with Daily, Weekly, and Monthly task sections, quick task adding, status checkboxes, and task details." />
