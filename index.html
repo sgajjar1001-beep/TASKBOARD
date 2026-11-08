@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Suppress dev server WebSocket disconnect errors in iframe preview (HMR is disabled)
+      (function() {
+        try {
+          var OriginalWebSocket = window.WebSocket;
+          if (OriginalWebSocket) {
+            window.WebSocket = function(url, protocols) {
+              if (
+                protocols === 'vite-hmr' ||
+                protocols === 'vite-ping' ||
+                (typeof url === 'string' && (url.includes('token=') || url.includes('@vite/client')))
+              ) {
+                var fakeSocket = {
+                  readyState: 1, // OPEN
+                  send: function() {},
+                  close: function() {},
+                  addEventListener: function(event, callback) {
+                    if (event === 'open') {
+                      setTimeout(function() { callback({ type: 'open' }); }, 0);
+                    }
+                  },
+                  removeEventListener: function() {},
+                  dispatchEvent: function() { return true; },
+                  onopen: null,
+                  onclose: null,
+                  onerror: null,
+                  onmessage: null,
+                };
+                setTimeout(function() {
+                  if (typeof fakeSocket.onopen === 'function') {
+                    fakeSocket.onopen({ type: 'open' });
+                  }
+                }, 0);
+                return fakeSocket;
+              }
+              return new OriginalWebSocket(url, protocols);
+            };
+            window.WebSocket.prototype = OriginalWebSocket.prototype;
+            window.WebSocket.CONNECTING = 0;
+            window.WebSocket.OPEN = 1;
+            window.WebSocket.CLOSING = 2;
+            window.WebSocket.CLOSED = 3;
+          }
+        } catch (e) {}
+
+        window.addEventListener('error', function(event) {
+          if (event && event.message && (event.message.includes('WebSocket') || event.message.includes('ws://') || event.message.includes('wss://'))) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+            return true;
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', function(event) {
+          if (event && event.reason && String(event.reason).includes('WebSocket')) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+          }
+        }, true);
+      })();
+    </script>
+    <title>Pinboard Task Manager</title>
+    <meta name="description" content="Clean Chrome Light 3-part task manager with Daily, Weekly, and Monthly task sections, quick task adding, status checkboxes, and task details." />
+    <meta property="og:title" content="Pinboard Task Manager" />
+    <meta property="og:description" content="Clean Chrome Light 3-part task manager with Daily, Weekly, and Monthly task sections, quick task adding, status checkboxes, and task details." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#1a73e8" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Pinboard" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="alternate icon" type="image/png" href="/pwa-192x192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-[#f1f3f4] text-[#202124] antialiased min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

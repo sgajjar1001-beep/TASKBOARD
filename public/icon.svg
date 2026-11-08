@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a73e8" />
+      <stop offset="100%" stop-color="#1557b0" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+    <linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ea4335" />
+      <stop offset="100%" stop-color="#c5221f" />
+    </linearGradient>
+  </defs>
+
+  <!-- App Rounded Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Inner Board / Card Canvas -->
+  <g filter="url(#shadow)">
+    <rect x="80" y="86" width="352" height="360" rx="36" fill="#ffffff" />
+    <!-- Top Header Bar of Board -->
+    <path d="M 80 122 C 80 102.1 96.1 86 116 86 L 396 86 C 415.9 86 432 102.1 432 122 L 432 144 L 80 144 Z" fill="#f1f3f4" />
+    <line x1="80" y1="144" x2="432" y2="144" stroke="#dadce0" stroke-width="3" />
+  </g>
+
+  <!-- 3 Task Rows on Board -->
+  <!-- Row 1: Completed Task -->
+  <g transform="translate(116, 184)">
+    <circle cx="22" cy="22" r="18" fill="#e6f4ea" stroke="#34a853" stroke-width="4" />
+    <polyline points="14,22 20,28 30,16" fill="none" stroke="#34a853" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="56" y="10" width="180" height="12" rx="6" fill="#5f6368" />
+    <rect x="56" y="28" width="90" height="8" rx="4" fill="#9aa0a6" />
+    <line x1="56" y1="16" x2="236" y2="16" stroke="#80868b" stroke-width="3" stroke-linecap="round" opacity="0.6" />
+  </g>
+
+  <!-- Row 2: In-Progress Task (Yellow) -->
+  <g transform="translate(116, 260)">
+    <circle cx="22" cy="22" r="18" fill="#fef7e0" stroke="#fbbc04" stroke-width="4" />
+    <circle cx="22" cy="22" r="6" fill="#fbbc04" />
+    <rect x="56" y="10" width="210" height="12" rx="6" fill="#202124" />
+    <rect x="56" y="28" width="130" height="8" rx="4" fill="#1a73e8" />
+  </g>
+
+  <!-- Row 3: Priority Task (Blue) -->
+  <g transform="translate(116, 336)">
+    <circle cx="22" cy="22" r="18" fill="#e8f0fe" stroke="#1a73e8" stroke-width="4" />
+    <rect x="56" y="10" width="160" height="12" rx="6" fill="#202124" />
+    <rect x="56" y="28" width="110" height="8" rx="4" fill="#9334e6" />
+  </g>
+
+  <!-- 3D Pushpin on Top of Board -->
+  <g transform="translate(256, 86)">
+    <!-- Pin shadow -->
+    <ellipse cx="6" cy="18" rx="20" ry="8" fill="#000000" opacity="0.3" />
+    <!-- Pin needle -->
+    <path d="M 0 0 L 0 24" stroke="#70757a" stroke-width="6" stroke-linecap="round" />
+    <!-- Pin head -->
+    <circle cx="0" cy="-6" r="24" fill="url(#pinGrad)" />
+    <!-- Pin highlight -->
+    <ellipse cx="-7" cy="-13" rx="7" ry="4" fill="#ffffff" opacity="0.65" transform="rotate(-30 -7 -13)" />
+    <circle cx="0" cy="-6" r="10" fill="#c5221f" />
+  </g>
+</svg>

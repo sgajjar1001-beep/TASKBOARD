@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with credentials and settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "username": { "type": "string", "maxLength": 100 },
+        "passwordHash": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "username"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Individual task note in daily, weekly, or monthly cadence",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "text": { "type": "string", "maxLength": 500 },
+        "cadence": { "type": "string", "enum": ["daily", "weekly", "monthly"] },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+        "color": { "type": "string", "maxLength": 30 },
+        "completed": { "type": "boolean" },
+        "assignedDate": { "type": "string", "maxLength": 30 },
+        "completedAt": { "type": "string", "maxLength": 50 },
+        "completedDate": { "type": "string", "maxLength": 30 },
+        "routineType": { "type": "string", "enum": ["fixed_daily", "single_day"] },
+        "carryForwardCount": { "type": "number" },
+        "lastCarriedDate": { "type": "string", "maxLength": 30 },
+        "pinned": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "text", "cadence"]
+    },
+    "UserData": {
+      "title": "UserData",
+      "description": "User synchronized board data bundle containing tasks and preferences",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "username": { "type": "string", "maxLength": 100 },
+        "notes": { "type": "string" },
+        "importantNotes": { "type": "string" },
+        "prefs": { "type": "string" },
+        "updatedAt": { "type": "number" },
+        "serverTimestamp": { "type": "string" }
+      },
+      "required": ["userId"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Multi-user team chat and conversation message",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "senderId": { "type": "string", "maxLength": 128 },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "text": { "type": "string", "maxLength": 2000 },
+        "timestamp": { "type": "string", "maxLength": 50 },
+        "referencedTaskId": { "type": "string", "maxLength": 128 },
+        "referencedTaskTitle": { "type": "string", "maxLength": 200 }
+      },
+      "required": ["id", "senderName", "text"]
+    },
+    "SharedTask": {
+      "title": "SharedTask",
+      "description": "Task shared or assigned between users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "taskId": { "type": "string", "maxLength": 128 },
+        "text": { "type": "string", "maxLength": 500 },
+        "notesDetail": { "type": "string", "maxLength": 2000 },
+        "cadence": { "type": "string" },
+        "priority": { "type": "string" },
+        "assignedBy": { "type": "string", "maxLength": 100 },
+        "assignedTo": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["pending", "accepted", "completed", "declined"] },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "taskId", "text", "assignedBy", "assignedTo"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserData",
+      "description": "Isolated user board tasks, important notes, and preferences"
+    },
+    "/chat_messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Real-time multi-user team chat messages"
+    },
+    "/shared_tasks/{taskId}": {
+      "schema": "SharedTask",
+      "description": "Assigned and shared tasks between users"
+    },
+    "/test/{testId}": {
+      "schema": "UserData",
+      "description": "Connection verification document"
+    }
+  }
+}

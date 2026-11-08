@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Health / connection test collection
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+
+    // Helper functions for security and abuse protection
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    // User Task Board Sync Documents:
+    // Requires authenticated user with a verified email address
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && isEmailVerified();
+
+      match /{subcollection=**} {
+        allow read, write: if isAuthenticated() && isEmailVerified();
+      }
+    }
+
+    // Real-time Multi-User Team Chat ("Baat-Chit")
+    match /chat_messages/{messageId} {
+      allow read, write: if isAuthenticated() && isEmailVerified();
+    }
+
+    // Shared and Assigned Tasks between Users
+    match /shared_tasks/{taskId} {
+      allow read, write: if isAuthenticated() && isEmailVerified();
+    }
+
+    // Directory of Registered Users (Public read for Crunchyroll-style Profile Selection on login screen)
+    match /directory_users/{userId} {
+      allow read: if true;
+      allow write: if userId is string && userId.size() > 0 && userId.size() <= 128;
+    }
+  }
+}

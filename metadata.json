@@ -1,0 +1,6 @@
+{
+  "name": "Pinboard Task Manager",
+  "description": "Clean Chrome Light 3-part task manager with Daily, Weekly, and Monthly task sections, quick task adding, status checkboxes, and task details.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
