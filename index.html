@@ -5,63 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>
       // Suppress dev server WebSocket disconnect errors in iframe preview (HMR is disabled)
-      (function() {
-        try {
-          var OriginalWebSocket = window.WebSocket;
-          if (OriginalWebSocket) {
-            window.WebSocket = function(url, protocols) {
-              if (
-                protocols === 'vite-hmr' ||
-                protocols === 'vite-ping' ||
-                (typeof url === 'string' && (url.includes('token=') || url.includes('@vite/client')))
-              ) {
-                var fakeSocket = {
-                  readyState: 1, // OPEN
-                  send: function() {},
-                  close: function() {},
-                  addEventListener: function(event, callback) {
-                    if (event === 'open') {
-                      setTimeout(function() { callback({ type: 'open' }); }, 0);
-                    }
-                  },
-                  removeEventListener: function() {},
-                  dispatchEvent: function() { return true; },
-                  onopen: null,
-                  onclose: null,
-                  onerror: null,
-                  onmessage: null,
-                };
-                setTimeout(function() {
-                  if (typeof fakeSocket.onopen === 'function') {
-                    fakeSocket.onopen({ type: 'open' });
-                  }
-                }, 0);
-                return fakeSocket;
-              }
-              return new OriginalWebSocket(url, protocols);
-            };
-            window.WebSocket.prototype = OriginalWebSocket.prototype;
-            window.WebSocket.CONNECTING = 0;
-            window.WebSocket.OPEN = 1;
-            window.WebSocket.CLOSING = 2;
-            window.WebSocket.CLOSED = 3;
-          }
-        } catch (e) {}
-
-        window.addEventListener('error', function(event) {
-          if (event && event.message && (event.message.includes('WebSocket') || event.message.includes('ws://') || event.message.includes('wss://'))) {
-            event.stopImmediatePropagation();
-            event.preventDefault();
-            return true;
-          }
-        }, true);
-        window.addEventListener('unhandledrejection', function(event) {
-          if (event && event.reason && String(event.reason).includes('WebSocket')) {
-            event.stopImmediatePropagation();
-            event.preventDefault();
-          }
-        }, true);
-      })();
+      window.addEventListener('error', function(event) {
+        if (event && event.message && (event.message.includes('WebSocket') || event.message.includes('ws://') || event.message.includes('wss://'))) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+          return true;
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function(event) {
+        if (event && event.reason && String(event.reason).includes('WebSocket')) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+        }
+      }, true);
     </script>
     <title>Pinboard Task Manager</title>
     <meta name="description" content="Clean Chrome Light 3-part task manager with Daily, Weekly, and Monthly task sections, quick task adding, status checkboxes, and task details." />
