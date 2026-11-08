@@ -19,6 +19,8 @@ import { FloatingChatButton } from './components/FloatingChatButton';
 import { TodayTaskSummaryModal } from './components/TodayTaskSummaryModal';
 import { ModesControlModal } from './components/ModesControlModal';
 import { TaskReminderAlertModal } from './components/TaskReminderAlertModal';
+import { FloatingAssistiveWidget } from './components/FloatingAssistiveWidget';
+import { AndroidOverlayPermissionModal } from './components/AndroidOverlayPermissionModal';
 import {
   fetchBingDailyWallpaper,
   getBingWallpaperEnabled,
@@ -226,6 +228,28 @@ export function App() {
     getNotificationPermission()
   );
   const [autoCarryForward, setAutoCarryForward] = useState<boolean>(true);
+
+  // Floating AssistiveTouch Assistant state & Android Overlay guide
+  const [isAssistiveTouchEnabled, setIsAssistiveTouchEnabled] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('pinboard_assistive_touch_enabled');
+      return saved !== 'false';
+    } catch {
+      return true;
+    }
+  });
+  const [isAndroidOverlayGuideOpen, setIsAndroidOverlayGuideOpen] = useState<boolean>(false);
+
+  const handleToggleAssistiveTouch = useCallback(() => {
+    setIsAssistiveTouchEnabled((prev) => {
+      const nextVal = !prev;
+      try {
+        localStorage.setItem('pinboard_assistive_touch_enabled', String(nextVal));
+      } catch {}
+      return nextVal;
+    });
+    playClickSound(muted);
+  }, [muted]);
 
   // Night Mode state with localStorage persistence
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -1745,6 +1769,12 @@ export function App() {
         onNextWallpaper={handleNextWallpaper}
         onRequestNotificationPermission={handleRequestNotificationPermission}
         notificationPermission={notificationPermission}
+        isAssistiveTouchEnabled={isAssistiveTouchEnabled}
+        onToggleAssistiveTouch={handleToggleAssistiveTouch}
+        onOpenAndroidGuide={() => {
+          setIsModesModalOpen(false);
+          setIsAndroidOverlayGuideOpen(true);
+        }}
       />
 
       {/* Task Reminder Audio-Visual Popup & Mobile/PC Notification Alert */}
@@ -1759,6 +1789,33 @@ export function App() {
         }}
         permissionStatus={notificationPermission}
         onRequestPermission={handleRequestNotificationPermission}
+      />
+
+      {/* iPhone-Style Floating AssistiveTouch Assistant Widget (Works on both Web & Mobile) */}
+      <FloatingAssistiveWidget
+        enabled={isAssistiveTouchEnabled}
+        onOpenNewTask={() => {
+          setNewTaskDefaultCadence('daily');
+          setIsNewTaskModalOpen(true);
+        }}
+        onOpenTodaySummary={() => setIsTaskSummaryOpen(true)}
+        onLockScreen={handleLock}
+        onCarryForward={handleCarryForwardAllDailyPending}
+        onOpenChat={() => {
+          setChatInitialViewMode('chat');
+          setIsChatModalOpen(true);
+        }}
+        onNextWallpaper={handleNextWallpaper}
+        onOpenModes={() => setIsModesModalOpen(true)}
+        onOpenAndroidGuide={() => setIsAndroidOverlayGuideOpen(true)}
+        onToggleEnabled={handleToggleAssistiveTouch}
+        muted={muted}
+      />
+
+      {/* Android APK Display Over Other Apps Permission & Picture-in-Picture Setup Guide */}
+      <AndroidOverlayPermissionModal
+        isOpen={isAndroidOverlayGuideOpen}
+        onClose={() => setIsAndroidOverlayGuideOpen(false)}
       />
 
       {/* Microsoft Bing Daily Wallpaper Floating Credit Badge with Manual Switch Button */}

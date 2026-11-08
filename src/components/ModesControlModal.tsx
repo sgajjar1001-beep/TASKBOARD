@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Image,
   RefreshCw,
+  Smartphone,
 } from 'lucide-react';
 
 export interface ModesState {
@@ -47,6 +48,9 @@ interface ModesControlModalProps {
   isBingWallpaperEnabled?: boolean;
   onToggleBingWallpaper?: () => void;
   onNextWallpaper?: () => void;
+  isAssistiveTouchEnabled?: boolean;
+  onToggleAssistiveTouch?: () => void;
+  onOpenAndroidGuide?: () => void;
 }
 
 export const ModesControlModal: React.FC<ModesControlModalProps> = ({
@@ -69,6 +73,9 @@ export const ModesControlModal: React.FC<ModesControlModalProps> = ({
   isBingWallpaperEnabled = true,
   onToggleBingWallpaper,
   onNextWallpaper,
+  isAssistiveTouchEnabled = true,
+  onToggleAssistiveTouch,
+  onOpenAndroidGuide,
 }) => {
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
 
@@ -174,6 +181,18 @@ export const ModesControlModal: React.FC<ModesControlModalProps> = ({
       onToggle: () => onToggleBingWallpaper?.(),
       noteText:
         'Connects directly to Microsoft Bing Picture of the Day to automatically update your board background every day with high-resolution landscapes & nature scenery. Features a subtle overlay for perfect task contrast and readability.',
+    },
+    {
+      id: 'assistive-touch',
+      title: 'iPhone Style Floating Assistant (AssistiveTouch)',
+      subtitle: isAssistiveTouchEnabled ? 'Floating quick button active on screen' : 'Floating bubble hidden',
+      icon: Smartphone,
+      iconColor: 'text-sky-500 dark:text-sky-400',
+      iconBg: 'bg-sky-100 dark:bg-sky-950/80',
+      active: Boolean(isAssistiveTouchEnabled),
+      onToggle: () => onToggleAssistiveTouch?.(),
+      noteText:
+        'Small draggable assistive bubble that stays on screen over the background on both mobile & desktop. Tap it anytime to quickly add tasks, view today’s schedule, lock screen, or switch wallpapers. Can also open Picture-in-Picture window or configure Android APK Display Over Other Apps permission.',
     },
   ];
 
@@ -323,6 +342,21 @@ export const ModesControlModal: React.FC<ModesControlModalProps> = ({
                           className="px-2.5 py-1 bg-[#1a73e8] hover:bg-[#1557b0] text-white text-[11px] font-bold rounded-lg cursor-pointer shadow-2xs"
                         >
                           Enable Notifications
+                        </button>
+                      </div>
+                    )}
+
+                    {item.id === 'assistive-touch' && onOpenAndroidGuide && (
+                      <div className="pt-1.5 flex items-center justify-between border-t border-amber-200 dark:border-amber-800">
+                        <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                          Android APK: Display Over Other Apps
+                        </span>
+                        <button
+                          type="button"
+                          onClick={onOpenAndroidGuide}
+                          className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-bold rounded-lg cursor-pointer shadow-2xs"
+                        >
+                          View Setup Guide
                         </button>
                       </div>
                     )}
